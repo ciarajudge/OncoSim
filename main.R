@@ -191,7 +191,7 @@ bigcancersimulator <- function(num_generations, generationmetastasis, num_metast
 
   
   outtable <- matrix(NA, nrow = num_generations, ncol = 10)
-  CNAprob <- 0.70
+  CNAprob <- 0.40
   mutationprob <- 0.001
   chrcopy <- c("mat", "pat")
   aberratedchrs <- c()
@@ -332,7 +332,7 @@ bigcancersimulator <- function(num_generations, generationmetastasis, num_metast
   addcountsandvaf <- function(table, purity) {
     seqerror <- 0.001
     totalcountsfinder <- function(row, table, purity) {
-      totalreads <- abs(round((purity*(sum(as.numeric(table[row, 5:6]))) + (1-purity)*2)*50))
+      totalreads <- abs(round((purity*(sum(as.numeric(table[row, 5:6]))) + (1-purity)*2)*500))
       actualtotalreads <- round(rnorm(1, mean = totalreads, sd = 25))
     }
     variantcountsfinder <- function(row, table, purity, totals) {
@@ -525,7 +525,9 @@ primvsmeta_vaf <- function(robject) {
     cluster <- as.numeric(outtable[i,2])
     outtable[i,5] <- colors1[cluster]
   }
-  plot(outtable[,3], outtable[,4], col = outtable[,5], ylab = "VAF in Metastasis Sample", xlab = "VAF in Primary Sample")
+  plot(outtable[,3], outtable[,4], col = outtable[,5], 
+       ylab = "VAF in Metastasis Sample", xlab = "VAF in Primary Sample",
+       ylim = c(0,1), xlim = c(0,1))
 }
 
 
