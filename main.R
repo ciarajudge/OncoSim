@@ -1,5 +1,6 @@
 bigcancersimulator <- function(num_generations, generationmetastasis, num_metastasis, purity) {
   par(new)
+  library(stringr)
   library(dplyr)
   library(RColorBrewer)
   library(abind)
@@ -71,7 +72,7 @@ bigcancersimulator <- function(num_generations, generationmetastasis, num_metast
     print("METASTASIS OCCURS")
     bigtable[,8] <- 1
     outtable <- matrix(0, nrow = (nrow(bigtable)+num_generations), ncol = 10)
-    outtable[1:nrow(bigtable),] <- bigtable
+    
     CNAprob <- cnaprob
     chrcopy <- c("mat", "pat")
     aberratedchrs <- copynuminfo[[1]]
@@ -181,6 +182,7 @@ bigcancersimulator <- function(num_generations, generationmetastasis, num_metast
       }
       newclusterprob <- newclusterprob*0.999999
     }
+    outtable[1:nrow(bigtable),] <- bigtable
     outtable <- na.omit(outtable)
     print("METASTASIS SIMULATION COMPLETE")
     return(list(outtable, clusterdescriptions, taus))
@@ -189,7 +191,7 @@ bigcancersimulator <- function(num_generations, generationmetastasis, num_metast
 
   
   outtable <- matrix(NA, nrow = num_generations, ncol = 10)
-  CNAprob <- 0.90
+  CNAprob <- 0.70
   mutationprob <- 0.001
   chrcopy <- c("mat", "pat")
   aberratedchrs <- c()
@@ -488,6 +490,43 @@ bigcancersimulator <- function(num_generations, generationmetastasis, num_metast
   return(list(outtable, metabranchpoint, meta))
 }
 
+primvsmeta_vaf <- function(robject) {
+  primary <- robject[[1]]
+  meta <- robject[[3]]
+  meta <- meta [[1]]
+  primarylite <- primary %>%
+    transmute(ID = X1, clusterlabel=X9, VAF = vaf)
+  metalite <- meta %>%
+    transmute(ID = X1, clusterlabel=X9, VAF = vaf)
+  mutations <- unique(c(primarylite$ID, metalite$ID))
+  totalmutations <- length(mutations)
+  mainclusters <- length(unique(primarylite$clusterlabel))
+  meta <- FALSE
+  count <- 1
+  metalite[grepl("METASTASIS", metalite$ID), 2] <- as.numeric(metalite[grepl("METASTASIS", metalite$ID), 2]) + mainclusters -1
+  outtable <- matrix(0, nrow = totalmutations, ncol = 5)
+  outtable[,1] <- mutations
+  for (i in 1:nrow(primarylite)) {
+    ID <- primarylite[i, 1]
+    row <- match(ID, mutations)
+    outtable[row, 2] <- primarylite[i, 2]
+    outtable[row, 3] <- primarylite[i, 3]
+  }
+  for (i in 1:nrow(metalite)) {
+    ID <- metalite[i, 1]
+    row <- match(ID, mutations)
+    outtable[row, 2] <- metalite[i, 2]
+    outtable[row, 4] <- metalite[i, 3]
+  }
+  totalclusters <- length(unique(outtable[,2]))
+  par(pty="s")
+  colors1 <- brewer.pal(totalclusters, "Set3")
+  for (i in 1:nrow(outtable)){
+    cluster <- as.numeric(outtable[i,2])
+    outtable[i,5] <- colors1[cluster]
+  }
+  plot(outtable[,3], outtable[,4], col = outtable[,5], ylab = "VAF in Metastasis Sample", xlab = "VAF in Primary Sample")
+}
 
 
 
