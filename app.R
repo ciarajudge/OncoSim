@@ -1,16 +1,16 @@
 library(shiny)
-source("helpers.R")
 
+source("helpers.R")
 
 ui <- fluidPage(
   tags$head(
     tags$style(
       HTML(".shiny-notification {
-              height: 100px;
-              width: 800px;
+              height: 10%;
+              width: 80%;
               position:fixed;
-              top: calc(50% - 50px);;
-              left: calc(50% - 400px);;
+              top: 40%;;
+              left: 10%;;
             }
            "
       )
@@ -32,20 +32,20 @@ ui <- fluidPage(
       sliderInput(inputId = "generations",
                   label = "Number of generations:",
                   min = 100,
-                  max = 2000,
+                  max = 1000,
                   value = 1000),
       
       sliderInput(inputId = "metastasis",
-                  label = "Generation where metastasis occurs:",
-                  min = 100,
-                  max = 2000,
-                  value = 500),
+                  label = "Point of metastasis",
+                  min = 10,
+                  max = 100,
+                  value = 50),
       
       sliderInput(inputId = "metagenerations",
                   label = "Number of metastasis generations:",
                   min = 100,
-                  max = 1000,
-                  value = 500),
+                  max = 500,
+                  value = 300),
       
       sliderInput(inputId = "purity",
                   label = "Sample purity:",
@@ -59,18 +59,18 @@ ui <- fluidPage(
     
     # Main panel for displaying outputs ----
     mainPanel(
-      p("Oncosim is a clonal evolution tree simulator that allows the CCF of 
+      h4("Oncosim is a clonal evolution tree simulator that allows the CCF of 
         clones and VAFs of mutations on human autosomal chromosomes to be
         modelled across primary and metastatic samples. Set your parameters in
         the sidebar, click go, and wait for the simulation to be complete."),
       br(),
-      br(),
+
       plotOutput(outputId = "chroms"),
       br(),
-      p("This is a visualisation of where on the genome the single nucleotide 
+      p("Pictured above is a visualisation of where on the human karyotype the single nucleotide 
       variants have occurred during the simulation. Chromosomes 1-22 are shown
         from left to right with the paternal and maternal copies coloured blue
-        and pink respectively. The locations of SNVs are marked by red Xs"),
+        and pink respectively. The locations of SNVs are marked by red crosses."),
       br(),
       br(),
 
@@ -95,10 +95,9 @@ ui <- fluidPage(
       
       plotOutput(outputId = "vaf"),
       br(),
-      p("This is a scatterplot of the cancer cell fractions of each cluster in
-        the primary and metastatic samples. Shared clusters will have two positive
-        coordinates, whereas clusters unique to either the primary or metastatic
-        tumours will line the x and y axis."),
+      
+      p("This is a scatterplot of the variant allele fractions of mutation in the
+      cancer coloured by the cluster to which they belong."),
     )
   )
 )
@@ -108,35 +107,59 @@ server <- function(input, output) {
   observeEvent(input$start, {
     if(input$select == 1) {
     withProgress(message = "Running Simulation", value = 0, {
-      chromplot <- bigcancersimulator(input$generations, input$metastasis, 
-                                      input$metagenerations, input$purity)
+      chromplot <- bigcancersimulator(input$generations, (input$generations * (input$metastasis/100)), 
+                 input$metagenerations, input$purity)
+      })
+      output$chroms <- renderPlot({
+        karyotypeplotter(chromplot[[5]], chromplot[[6]])
+      })
+      output$tree <- renderPlot({
+        treeinfo <- chromplot[[4]]
+        clusterdescriptions <- treeinfo[[1]]
+        taus <- treeinfo[[2]]
+        metabranchpoint <- treeinfo[[3]]
+        meta <- treeinfo[[4]]
+        clusterlabels <- treeinfo[[5]]
+        metaclusterlabels <- treeinfo[[6]]
+        treeplotterwithmeta(clusterdescriptions, taus, metabranchpoint, meta, 
+                            clusterlabels, metaclusterlabels)
+      })
+      output$ccf <- renderPlot({
+        ccfplotter(chromplot)
+      })
+      output$vaf <- renderPlot({
+        primvsmeta_vaf(chromplot)
     })
     }
     else {
       withProgress(message = "Running Simulation", value = 0, {
-        chromplot <- evofreezesimulator(input$generations, input$metastasis, 
+       chromplot <- evofreezesimulator(input$generations, (input$generations * (input$metastasis/100)), 
                                         input$metagenerations, input$purity)
+       output$chroms <- renderPlot({
+         karyotypeplotter(chromplot[[5]], chromplot[[6]])
+       })
+       output$tree <- renderPlot({
+         treeinfo <- chromplot[[4]]
+         clusterdescriptions <- treeinfo[[1]]
+         taus <- treeinfo[[2]]
+         metabranchpoint <- treeinfo[[3]]
+         meta <- treeinfo[[4]]
+         clusterlabels <- treeinfo[[5]]
+         metaclusterlabels <- treeinfo[[6]]
+         treeplotterwithmeta(clusterdescriptions, taus, metabranchpoint, meta, 
+                             clusterlabels, metaclusterlabels)
+       })
+       output$ccf <- renderPlot({
+         ccfplotter(chromplot)
+       })
+       output$vaf <- renderPlot({
+         primvsmeta_vaf(chromplot)
+       })
     })
     }  
-    output$chroms <- renderPlot({
-      chromplot[[1]]
-    })
-    output$tree <- renderPlot({
-      chromplot[[2]]
-    })
-    output$ccf <- renderPlot({
-      chromplot[[3]]
-    })
-    output$vaf <- renderPlot({
-      chromplot[[4]]
-    })
-  })
-
-
-  output$tree <- renderPlot({
     
   })
-  
+
 }
 
 
