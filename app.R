@@ -62,7 +62,7 @@ ui <- fluidPage(
       p("Oncosim is a clonal evolution tree simulator that allows the CCF of 
         clones and VAFs of mutations on human autosomal chromosomes to be
         modelled across primary and metastatic samples. Set your parameters in
-        the sidebar and wait for the simulation to be complete."),
+        the sidebar, click go, and wait for the simulation to be complete."),
       br(),
       br(),
       plotOutput(outputId = "chroms"),
@@ -90,6 +90,15 @@ ui <- fluidPage(
         the primary and metastatic samples. Shared clusters will have two positive
         coordinates, whereas clusters unique to either the primary or metastatic
         tumours will line the x and y axis."),
+      br(),
+      br(),
+      
+      plotOutput(outputId = "vaf"),
+      br(),
+      p("This is a scatterplot of the cancer cell fractions of each cluster in
+        the primary and metastatic samples. Shared clusters will have two positive
+        coordinates, whereas clusters unique to either the primary or metastatic
+        tumours will line the x and y axis."),
     )
   )
 )
@@ -97,10 +106,18 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   observeEvent(input$start, {
+    if(input$select == 1) {
     withProgress(message = "Running Simulation", value = 0, {
       chromplot <- bigcancersimulator(input$generations, input$metastasis, 
                                       input$metagenerations, input$purity)
     })
+    }
+    else {
+      withProgress(message = "Running Simulation", value = 0, {
+        chromplot <- evofreezesimulator(input$generations, input$metastasis, 
+                                        input$metagenerations, input$purity)
+    })
+    }  
     output$chroms <- renderPlot({
       chromplot[[1]]
     })
@@ -109,6 +126,9 @@ server <- function(input, output) {
     })
     output$ccf <- renderPlot({
       chromplot[[3]]
+    })
+    output$vaf <- renderPlot({
+      chromplot[[4]]
     })
   })
 
