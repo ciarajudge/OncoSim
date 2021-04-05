@@ -1,5 +1,6 @@
 bigcancersimulator <- function(num_generations, generationmetastasis, num_metastasis, purity) {
   par(new)
+  library(stringr)
   library(dplyr)
   library(RColorBrewer)
   library(abind)
@@ -485,6 +486,7 @@ bigcancersimulator <- function(num_generations, generationmetastasis, num_metast
   meta[[1]] <- metatable
   treeplotterwithmeta(clusterdescriptions, taus, metabranchpoint, meta, clusterlabels, metaclusterlabels)
   ccfplotter(outtable, metatable)
+  try <- recordPlot()
   return(list(outtable, metabranchpoint, meta))
 }
 

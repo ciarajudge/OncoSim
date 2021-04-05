@@ -1,7 +1,21 @@
 library(shiny)
+source("helpers.R")
+
 
 ui <- fluidPage(
-  
+  tags$head(
+    tags$style(
+      HTML(".shiny-notification {
+              height: 100px;
+              width: 800px;
+              position:fixed;
+              top: calc(50% - 50px);;
+              left: calc(50% - 400px);;
+            }
+           "
+      )
+    )
+  ),
   # App title ----
   titlePanel("OncoSim"),
   
@@ -10,7 +24,7 @@ ui <- fluidPage(
     
     # Sidebar panel for inputs ----
     sidebarPanel(
-      selectInput("select", h3("Simulation Style"), 
+      selectInput("select", h4("Simulation Style"), 
                   choices = list("Original" = 1, "Evofreeze" = 2), 
                   selected = 1),
       
@@ -23,15 +37,21 @@ ui <- fluidPage(
       
       sliderInput(inputId = "metastasis",
                   label = "Generation where metastasis occurs:",
-                  min = 200,
-                  max = 1900,
+                  min = 100,
+                  max = 2000,
                   value = 500),
       
       sliderInput(inputId = "metagenerations",
                   label = "Number of metastasis generations:",
-                  min = 10,
-                  max = 2000,
-                  value = 30),
+                  min = 100,
+                  max = 1000,
+                  value = 500),
+      
+      sliderInput(inputId = "purity",
+                  label = "Sample purity:",
+                  min = 0.1,
+                  max = 1,
+                  value = 0.9),
       
       actionButton("start", label = "Go")
       
@@ -39,23 +59,61 @@ ui <- fluidPage(
     
     # Main panel for displaying outputs ----
     mainPanel(
-      
-      # Output: Histogram ----
-      plotOutput(outputId = "tree")
-      
+      p("Oncosim is a clonal evolution tree simulator that allows the CCF of 
+        clones and VAFs of mutations on human autosomal chromosomes to be
+        modelled across primary and metastatic samples. Set your parameters in
+        the sidebar and wait for the simulation to be complete."),
+      br(),
+      br(),
+      plotOutput(outputId = "chroms"),
+      br(),
+      p("This is a visualisation of where on the genome the single nucleotide 
+      variants have occurred during the simulation. Chromosomes 1-22 are shown
+        from left to right with the paternal and maternal copies coloured blue
+        and pink respectively. The locations of SNVs are marked by red Xs"),
+      br(),
+      br(),
+
+      plotOutput(outputId = "tree"),
+      br(),
+      p("This is the clonal evolution tree of the mutations produced during the
+        simulation. The cancer spawns from a grey 'normal' cell, with nodes coloured
+        according to their cancer cell fraction, and labelled with their cluster 
+        genotype. The metastatic tree is connected to its seed in the primary tree
+        with a dotted line"),
+      br(),
+      br(),
+
+      plotOutput(outputId = "ccf"),
+      br(),
+      p("This is a scatterplot of the cancer cell fractions of each cluster in
+        the primary and metastatic samples. Shared clusters will have two positive
+        coordinates, whereas clusters unique to either the primary or metastatic
+        tumours will line the x and y axis."),
     )
   )
 )
 
 
 server <- function(input, output) {
-  num_generations <- (eventReactive(input$start, {input$generations}))
-  time_metastasis <- (eventReactive(input$start, {input$metastasis}))
-  num_metastasis <- (eventReactive(input$start, {input$metagenerations}))
-  
-  output$tree <- renderPlot({
+  observeEvent(input$start, {
+    withProgress(message = "Running Simulation", value = 0, {
+      chromplot <- bigcancersimulator(input$generations, input$metastasis, 
+                                      input$metagenerations, input$purity)
+    })
+    output$chroms <- renderPlot({
+      chromplot[[1]]
+    })
+    output$tree <- renderPlot({
+      chromplot[[2]]
+    })
+    output$ccf <- renderPlot({
+      chromplot[[3]]
+    })
+  })
 
-    barplot(c(num_generations, time_metastasis, num_metastasis))
+
+  output$tree <- renderPlot({
     
   })
   
