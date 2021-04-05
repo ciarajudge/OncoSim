@@ -107,7 +107,7 @@ server <- function(input, output) {
   observeEvent(input$start, {
     if(input$select == 1) {
     withProgress(message = "Running Simulation", value = 0, {
-      chromplot <- bigcancersimulator(input$generations, (input$generations * (input$metastasis/100)), 
+      chromplot <- bigcancersimulator(input$generations, round(input$generations * (input$metastasis/100)), 
                  input$metagenerations, input$purity)
       })
       output$chroms <- renderPlot({
