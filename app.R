@@ -133,7 +133,7 @@ server <- function(input, output) {
     }
     else {
       withProgress(message = "Running Simulation", value = 0, {
-       chromplot <- evofreezesimulator(input$generations, (input$generations * (input$metastasis/100)), 
+       chromplot <- evofreezesimulator(input$generations, round(input$generations * (input$metastasis/100)), 
                                         input$metagenerations, input$purity)
        output$chroms <- renderPlot({
          karyotypeplotter(chromplot[[5]], chromplot[[6]])

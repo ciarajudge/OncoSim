@@ -807,6 +807,7 @@ evofreezesimulator <- function(num_generations, generationmetastasis, num_metast
       branchlineage <- paste0(LETTERS[lineage], collapse = "")
       inputtable <- data.frame(outtable) %>%
         filter(X9 %in% lineage)
+      
       metabranchpoint <- cluster
       inputtable <- as.matrix(inputtable)
       meta <- metastasis(inputtable, list(aberratedchrs, abberatedloci, abberatedstate),num_metastasis, CNAprob, lineage)
@@ -1035,7 +1036,7 @@ evofreezesimulator <- function(num_generations, generationmetastasis, num_metast
     returnvector <- c()
     for (i in clusterlist) {
       numbers <- unlist(str_split(i, branchlineage))
-      decomposed <- na.omit(as.numeric(unlist(str_split(numbers, ""))))
+      decomposed <- suppressWarnings(na.omit(as.numeric(unlist(str_split(numbers, "")))))
       decomposed <- decomposed + (primaryexpansions-1)
       decomposed <- na.omit(decomposed[2:length(decomposed)])
       label <- paste0(c(branchlineage, LETTERS[decomposed]), collapse = "")
@@ -1116,6 +1117,11 @@ evofreezesimulator <- function(num_generations, generationmetastasis, num_metast
     plot(outtable[,3], outtable[,4], col = outtable[,5], 
          ylab = "VAF in Metastasis Sample", xlab = "VAF in Primary Sample",
          ylim = c(0,1), xlim = c(0,1))
+  }
+  
+  for (i in 1:nrow(inputtable)) {
+    row <- match(inputtable[i,1], outtable[,1])
+    outtable[row,] <- inputtable[i,]
   }
   
   chromplot <- recordPlot()
