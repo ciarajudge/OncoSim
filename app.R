@@ -36,16 +36,16 @@ ui <- fluidPage(
                   value = 1000),
       
       sliderInput(inputId = "metastasis",
-                  label = "Point of metastasis",
+                  label = "Point of metastasis (after what % of primary generations):",
                   min = 10,
                   max = 100,
-                  value = 50),
+                  value = 75),
       
       sliderInput(inputId = "metagenerations",
                   label = "Number of metastasis generations:",
                   min = 100,
                   max = 500,
-                  value = 300),
+                  value = 500),
       
       sliderInput(inputId = "purity",
                   label = "Sample purity:",

@@ -1306,10 +1306,10 @@ karyotypeplotter <- function(xs, ys) {
                   46709983, 50818468)
   par(mar=c(0,0,0,0), pty = "m")
   plot(c(1, 1), c(0, ChrLengths[1]/1000), type = "l", bty = "n", 
-     lwd = 3, col = "Navy", xlim = c(0, 45), yaxt = "n", xaxt = "n", ylab = "",
+     lwd = 3, col = "deepskyblue", xlim = c(-1, 45), yaxt = "n", xaxt = "n", ylab = "",
      xlab = "")
   count <- 1.01
-  cols <- c("pink", "navy")
+  cols <- c("pink", "deepskyblue")
   for(x in 2:44) {
     index <- round(count)
     lines(c(x, x), c(0, ChrLengths[index]/1000), lwd = 3, col = cols[(x%%2)+1])
