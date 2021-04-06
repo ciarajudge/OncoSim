@@ -242,6 +242,7 @@ bigcancersimulator <- function(num_generations, generationmetastasis, num_metast
       meta <- metastasis(inputtable, list(aberratedchrs, abberatedloci, abberatedstate),num_metastasis, CNAprob, lineage)
       xs <- c(xs, meta[[4]]) 
       ys <- c(ys, meta[[5]])
+      newclusterprob <- 0
       }
     #Part 1 - Mutate a Locus
     matorpat <- sample(1:2, 1)
@@ -811,6 +812,7 @@ evofreezesimulator <- function(num_generations, generationmetastasis, num_metast
       meta <- metastasis(inputtable, list(aberratedchrs, abberatedloci, abberatedstate),num_metastasis, CNAprob, lineage)
       xs <- c(xs, meta[[4]])
       ys <- c(ys, meta[[5]])
+      newclusterprob <- 0
       }
     #Part 1 - Mutate a Locus
     matorpat <- sample(1:2, 1)
