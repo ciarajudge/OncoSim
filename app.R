@@ -98,6 +98,9 @@ ui <- fluidPage(
       
       p("This is a scatterplot of the variant allele fractions of mutation in the
       cancer coloured by the cluster to which they belong."),
+      br(),
+      br(),
+      tableOutput(outputId = "table")
     )
   )
 )
@@ -130,6 +133,9 @@ server <- function(input, output) {
       output$vaf <- renderPlot({
         primvsmeta_vaf(chromplot)
     })
+      output$table <- renderTable({
+        chromplot[[1]]
+      })
     }
     else {
       withProgress(message = "Running Simulation", value = 0, {
