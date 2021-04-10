@@ -100,6 +100,8 @@ ui <- fluidPage(
       cancer coloured by the cluster to which they belong."),
       br(),
       br(),
+      br(),
+      h4("Primary Tumour Mutation Table"),
       tableOutput(outputId = "table")
     )
   )
@@ -134,7 +136,11 @@ server <- function(input, output) {
         primvsmeta_vaf(chromplot)
     })
       output$table <- renderTable({
-        chromplot[[1]]
+        table <- chromplot[[1]]
+        colnames(table) <- c("ID", "Chromosome", "Locus", "Mat/Pat (1/2)", "Maternal Copies",
+                             "Paternal Copies", "Multiplicity", "CCF", "Clone Number", "Genotype",
+                             "Total Counts", "Variant Counts", "VAF")
+        table
       })
     }
     else {
